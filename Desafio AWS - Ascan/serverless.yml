@@ -1,0 +1,81 @@
+service: ascandesafio
+
+custom:
+  settings:
+    POSTS_TABLE: posts
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  environment: ${self:custom.settings}
+  region: sa-east-1
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action: 
+            - dynamodb:DescribeTable
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: 
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.POSTS_TABLE}"
+      
+functions:
+  createPost:
+    handler: handler.createPost
+    events:
+      - http: 
+          path: /postascan
+          method: post
+  getAllPosts:
+    handler: handler.getAllPosts
+    events:
+      - http: 
+          path: /postsascan
+          method: get
+  getPosts:
+    handler: handler.getPosts
+    events:
+      - http: 
+          path: /postsascan/{number}
+          method: get
+  getPost:
+    handler: handler.getPost
+    events:
+      - http: 
+          path: /postascan/{id}
+          method: get 
+  updatePost:
+    handler: handler.updatePost
+    events:
+      - http: 
+          path: /postascan/{id}
+          method: put
+  deletePost:
+    handler: handler.deletePost
+    events:
+      - http: 
+          path: /postascan/{id}
+          method: delete
+
+
+resources:
+  Resources:
+    PostsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions: 
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema: 
+          - AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.settings.POSTS_TABLE}
