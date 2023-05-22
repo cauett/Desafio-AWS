@@ -1,0 +1,80 @@
+service: ascandesafio
+
+custom:
+  settings:
+    POKEMON_TABLE: pokemon
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  environment: ${self:custom.settings}
+  region: sa-east-1
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.POKEMON_TABLE}"
+
+functions:
+  createPokemon:
+    handler: handler.createPokemon
+    events:
+      - http:
+          path: /pokemon
+          method: post
+  getAllPokemon:
+    handler: handler.getAllPokemon
+    events:
+      - http:
+          path: /pokemons
+          method: get
+  getPokemonByNumberOfPokemon:
+    handler: handler.getPokemonByNumberOfPokemon
+    events:
+      - http:
+          path: /pokemons/{numberOfPokemon}
+          method: get
+  getPokemonById:
+    handler: handler.getPokemonById
+    events:
+      - http:
+          path: /pokemon/{id}
+          method: get
+  updatePokemon:
+    handler: handler.updatePokemon
+    events:
+      - http:
+          path: /pokemon/{id}
+          method: put
+  deletePokemon:
+    handler: handler.deletePokemon
+    events:
+      - http:
+          path: /pokemon/{id}
+          method: delete
+
+resources:
+  Resources:
+    PokemonTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.settings.POKEMON_TABLE}
