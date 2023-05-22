@@ -34,7 +34,7 @@ module.exports.createPokemon = async (event, context, callback) => {
     return callback(null, response(400, { error: 'O Pokémon deve ter um nome e um tipo, não pode ser vazio' }));
   }
 
-  // Criar o objeto do Pokémon com um ID gerado pelo UUID, data de criação atual, nome e tipo do Pokémon
+  // Criar o objeto do Pokémon com um ID gerado pelo UUID, data de criação atual, id/numero da pokedex, nome e tipo do Pokémon
   const pokemon = {
     id: uuid.v4(),
     createdAt: new Date().toISOString(),
