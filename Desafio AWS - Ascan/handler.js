@@ -3,7 +3,6 @@
 // Importar a biblioteca AWS SDK para interagir com a AWS
 const AWS = require('aws-sdk');
 const db = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
-const uuid = require('uuid');
 
 // Obter o nome da tabela de Pokémon do ambiente
 const pokemonTable = process.env.POKEMON_TABLE;
@@ -34,9 +33,8 @@ module.exports.createPokemon = async (event, context, callback) => {
     return callback(null, response(400, { error: 'O Pokémon deve ter um nome e um tipo, não pode ser vazio' }));
   }
 
-  // Criar o objeto do Pokémon com um ID gerado pelo UUID, data de criação atual, id/numero da pokedex, nome e tipo do Pokémon
+  // Criar o objeto do Pokémon com um ID, data de criação atual, nome e tipo do Pokémon
   const pokemon = {
-    id: uuid.v4(),
     createdAt: new Date().toISOString(),
     id: reqBody.id,
     name: reqBody.name,
